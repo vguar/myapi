@@ -1,0 +1,50 @@
+#!/usr/bin/python
+from __future__ import absolute_import
+import json
+import getopt
+import sys
+
+from consumer.tasks import post
+
+
+def usage():
+    print "Usage:"
+    print "  %s -f <jsonfile>" % __file__
+    print "  %s -d <jsonstring>" % __file__
+    print "  %s -h" % __file__
+
+
+def main():
+    argv = sys.argv[1:]
+    d={}
+    try:
+        opts, args = getopt.getopt(argv,"hf:d:t:")
+    except getopt.GetoptError:
+        usage()
+        sys.exit(2)
+
+    try:
+        for opt, arg in opts:
+            if opt == '-h':
+                usage()
+                sys.exit()
+            elif opt in ("-f"):
+	        with open(arg) as json_data:
+    	            d = json.load(json_data)
+    	            json_data.close()
+                    break
+            elif opt in ("-d"):
+                d = json.loads(arg)
+                break
+    except ValueError:
+        print "Looks like a Bad JSON Format"
+        sys.exit(3)
+    except IOError:
+        print "File %s is Missing" % arg
+        sys.exit(4)
+    res = post(**d)
+    print "task return %s" % res
+    sys.exit()
+
+
+main()

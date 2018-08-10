@@ -1,0 +1,19 @@
+        "description": "Amazingresources description",
+        "type": "object",
+        "_objectClass": "{{ prefixClass }}{{ arg.type }}ResourceFields",
+        "additionalProperties": false,
+        "required":[],
+        "properties": {
+{% if apiClassType != "AmazingresourcesPostRequest" %}
+          "id": {
+            "_required": true,
+            "description": "amazingresources id",
+            "type": "string"
+          },
+{% endif %}
+          "description": {
+            "_required": true,
+            "description": "amazingresources description",
+            "type": "string"
+          }
+        }

@@ -1,0 +1,210 @@
+apiVersion: v1
+kind: Template
+objects:
+
+###### Routes #####
+
+- apiVersion: route.openshift.io/v1
+  kind: Route
+  metadata:
+    labels:
+      app: "${GIT_BRANCH}"
+      component: "api"
+      branch: "${GIT_BRANCH}"
+      promotion-group: "api"
+    name: "${GIT_BRANCH}"
+  spec:
+    tls:
+      insecureEdgeTerminationPolicy: Redirect
+      termination: edge
+    to:
+      kind: Service
+      name: "api-${GIT_BRANCH}"
+
+###### Services #####
+
+- apiVersion: "v1"
+  kind: "Service"
+  metadata:
+    name: "api-${GIT_BRANCH}"
+    labels:
+      app: "${GIT_BRANCH}"
+      component: "api"
+      branch: "${GIT_BRANCH}"
+      promotion-group: "api"
+  spec:
+    kind: ClusterIP
+    ports:
+      - name: http
+        port: 5000
+        targetPort: http
+    selector:
+      app: "${GIT_BRANCH}"
+      component: "api"
+      branch: "${GIT_BRANCH}"
+
+- apiVersion: v1
+  kind: Service
+  metadata:
+    labels:
+      app: "${GIT_BRANCH}"
+      component: "redis-server"
+      branch: "${GIT_BRANCH}"
+      promotion-group: "api"
+    name: "redis-server-${GIT_BRANCH}"
+  spec:
+    ports:
+    - name: redis
+      port: 6379
+      protocol: TCP
+      targetPort: 6379
+    selector:
+      app: "${GIT_BRANCH}"
+      component: "redis-server"
+      branch: "${GIT_BRANCH}"
+    sessionAffinity: None
+    type: ClusterIP
+
+###### ConfigMaps ######
+
+- apiVersion: v1
+  kind: ConfigMap
+  metadata:
+    labels:
+      app: "${GIT_BRANCH}"
+      component: "redis-server"
+      branch: "${GIT_BRANCH}"
+      promotion-group: "api"
+    name: "redis-server-${GIT_BRANCH}"
+  data:
+    redis.conf: |-
+      tcp-keepalive 60
+
+##### DeploymentConfig #####
+
+- apiVersion: "v1"
+  kind: "DeploymentConfig"
+  metadata:
+    labels:
+      app: "${GIT_BRANCH}"
+      component: "redis-server"
+      branch: "${GIT_BRANCH}"
+      promotion-group: "api"
+    name: "redis-server-${GIT_BRANCH}"
+  spec:
+    strategy:
+      type: Recreate
+    template:
+      metadata:
+        labels:
+          app: "${GIT_BRANCH}"
+          component: "redis-server"
+          branch: "${GIT_BRANCH}"
+      spec:
+        containers:
+        - command:
+            - "redis-server"
+            - "/redis/redis.conf"
+            - "--port"
+            - "6379"
+          imagePullPolicy: Always
+          livenessProbe:
+            exec:
+              command:
+              - "sh"
+              - "-c"
+              - "redis-cli -h $(hostname) ping"
+            failureThreshold: 3
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 5
+          name: redis
+          ports:
+          - containerPort: 6379
+            name: redis
+            protocol: TCP
+          readinessProbe:
+            exec:
+              command:
+              - "sh"
+              - "-c"
+              - "redis-cli -h $(hostname) ping"
+            failureThreshold: 3
+            initialDelaySeconds: 15
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 5
+          resources:
+            limits:
+              cpu: ${REDIS_SERVER_CPU}
+              memory: ${REDIS_SERVER_MEM}
+            requests:
+              cpu: 100m
+              memory: 100Mi
+          volumeMounts:
+          - mountPath: /redis/
+            name: redis-config
+          - mountPath: /data
+            name: redis-data
+        volumes:
+        - configMap:
+            defaultMode: 420
+            name: "redis-server-${GIT_BRANCH}"
+          name: redis-config
+        - name: "redis-data"
+          persistentVolumeClaim:
+            claimName: "redis-server-${GIT_BRANCH}"
+    replicas: 1
+    triggers:
+      - type: ConfigChange
+      - type: ImageChange
+        imageChangeParams:
+          automatic: true
+          containerNames:
+          - "redis"
+          from:
+            kind: ImageStreamTag
+            name: "redis-${GIT_BRANCH}:latest"
+
+##### PVC #####
+
+- apiVersion: "v1"
+  kind: "PersistentVolumeClaim"
+  metadata:
+    labels:
+      app: "${GIT_BRANCH}"
+      component: "redis-server"
+      branch: "${GIT_BRANCH}"
+      promotion-group: "api"
+    name: "redis-server-${GIT_BRANCH}"
+  spec:
+    accessModes:
+      - "ReadWriteOnce"
+    resources:
+      requests:
+        storage: "${VOLUME_CAPACITY}"
+
+
+##### Parameters #####
+
+parameters:
+- description: The git branch name
+  displayName: The git branch name
+  name: GIT_BRANCH
+  required: true
+- description: Redis PVC size
+  displayName: Volume Capacity
+  name: VOLUME_CAPACITY
+  required: true
+  value: 10Gi
+- description: Redis CPU Limit
+  displayName: CPU Limit
+  name: REDIS_SERVER_CPU
+  required: true
+  value: 400m
+- description: Redis Memory Limit
+  displayName: Memory Limit
+  name: REDIS_SERVER_MEM
+  required: true
+  value: 500Mi

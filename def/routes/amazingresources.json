@@ -1,0 +1,32 @@
+[
+  {
+    "enabled": true,
+    "description": "Test amazingresources",
+    "class": "resources.amazingresources@Test",
+    "endpoint": "amazingresourcestest",
+    "url": "/amazingresources/_test"
+  },
+  {
+    "enabled": true,
+    "description": "Amazingresources management",
+    "class": "resources.amazingresources@Amazingresources",
+    "endpoint": "amazingresources",
+    "url": "/amazingresources"
+  },
+
+  {
+    "enabled": true,
+    "description": "Get amazingresources status",
+    "class": "resources.amazingresources@AmazingresourcesStatusById",
+    "endpoint": "amazingresourcesStatusById",
+    "url": "/amazingresources/<string:id>/status"
+  },
+  {
+    "enabled": true,
+    "description": "Qualified amazingresources management",
+    "class": "resources.amazingresources@AmazingresourcesById",
+    "endpoint": "amazingresourcesById",
+    "url": "/amazingresources/<string:id>"
+  }
+
+]

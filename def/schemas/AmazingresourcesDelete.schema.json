@@ -1,0 +1,8 @@
+{% set prefixClass = ctx.module + "@" + api.name %}
+{% set apiClassType = api.name + arg.type %}
+{
+  "$schema": "http://json-schema.org/draft-04/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": []
+}

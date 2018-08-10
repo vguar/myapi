@@ -1,0 +1,41 @@
+{% set prefixClass = ctx.module + "@" + api.name %}
+{% set apiClassType = api.name + arg.type %}
+{
+  "$schema": "http://json-schema.org/draft-04/schema",
+  "type":"object",
+  "additionalProperties":false,
+  "required":[],
+  "properties": {
+  },
+  "definitions":{
+    "response": {
+      "description":"Main response structure",
+      "type":"object",
+      "_objectClass":"{{ prefixClass }}ResponseFields",
+      "additionalProperties":false,
+      "required":["results"],
+      "properties":{
+        "results": {
+          "$ref":"#/definitions/response.results"
+        }
+      }
+    },
+    "response.results": {
+      "description":"Checks result",
+      "type":"array",
+      "items":{
+        "description":"Check result",
+        "type":"object",
+        "_objectClass":"{{ prefixClass }}ResponseResultsFields",
+        "additionalProperties":false,
+        "required":["id", "status", "message"],
+        "properties":{
+          "name": {
+            "description": "Name of the worker",
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

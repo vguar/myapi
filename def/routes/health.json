@@ -1,0 +1,10 @@
+[
+  {
+    "enabled": true,
+    "description": "Health management",
+    "class": "resources.health@Health",
+    "endpoint": "health",
+    "url": "/_health"
+  },
+
+]

@@ -1,0 +1,12 @@
+{% set prefixClass = ctx.module + "@" + api.name %}
+{% set apiClassType = api.name + arg.type %}
+{
+  "$schema": "http://json-schema.org/draft-04/schema",
+{% include 'Amazingresources.j2.json' with context %}
+  ,
+  "definitions":{
+    "response": {
+{% include 'Amazingresources.j2.json' with context %}
+    }
+  }
+}

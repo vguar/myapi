@@ -1,0 +1,25 @@
+{
+  "name": "HealthGet",
+  "enabled": true,
+  "description": "health check",
+  "swagger": true,
+  "authentication": true,
+  "authorization": true,
+  "authentClass": "flaskit.authentication_lib.token_based@TokenAuthent",
+  "audit": 3,
+  "stats": true,
+  "statsd": false,
+  "dryrun": false,
+  "cache": 0,
+  "loglevel": "DEBUG",
+  "logbody": 1,
+  "logrequest": 3,
+  "args": {},
+  "swaggerResponseClass": "HealthGetResponseFields",
+  "swaggerResponseMessages": [
+    {
+      "code": 200,
+      "message": "Successfull operation"
+    }
+  ]
+}

@@ -1,0 +1,56 @@
+{
+  "name": "AmazingresourcesDelete",
+  "enabled": true,
+  "description": "Delete a amazingresources",
+  "swagger": true,
+  "authentication": true,
+  "authorization": true,
+  "authentClass": "flaskit.authentication_lib.token_based@TokenAuthent",
+  "audit": 3,
+  "stats": true,
+  "statsd": false,
+  "dryrun": true,
+  "cache": 0,
+  "loglevel": "DEBUG",
+  "logbody": 1,
+  "logrequest": 3,
+  "args": {
+    "id": {
+      "description": "amazingresources id to delete",
+      "dataType": "string",
+      "regexp":   "^[a-zA-Z0-9-_.]+$",
+      "location": "uri",
+      "required": true
+    },
+    "async": {
+      "description": "Set to true to do an asynchronous request",
+      "dataType": "boolean",
+      "location": "args",
+      "required": true,
+      "default": false
+    },
+    "range": {
+      "description": "Range of the pagination",
+      "dataType": "string",
+      "regexp": "^[0-9]+-[0-9]+$",
+      "location": "args",
+      "required": true,
+      "default": "0-10"
+    }
+  },
+  "swaggerResponseClass": "AmazingresourcesDeleteResponseFields",
+  "swaggerResponseMessages": [
+    {
+      "code": 202,
+      "message": "Accepted"
+    },
+    {
+      "code": 204,
+      "message": "Successful operation"
+    },
+    {
+      "code": 404,
+      "message": "Object not found"
+    }
+  ]
+}

@@ -1,0 +1,59 @@
+apiVersion: v1
+kind: Template
+objects:
+
+##### Configmap #####
+- apiVersion: batch/v1
+  kind: Job
+  metadata:
+    name: "promote-${IMAGE_STREAM}-${BUILD_NUMBER}"
+    labels:
+      app: "${GIT_BRANCH}"
+      component: "api"
+      branch: "${GIT_BRANCH}"
+      promotion-group: "api"
+  spec:
+    parallelism: 1
+    completions: 1
+    template:
+      metadata:
+        name: pi
+      spec:
+        containers:
+        - name: curl
+          image: python-slave
+          command:
+            - "/bin/bash"
+            - "-c"
+            - |
+              echo "{\"src_tag\":\"$src_registry$image_stream:latest\", \"dst_tag\":\"$dst_registry$image_stream:$build_number\", \"src_creds\":\"$src_creds\", \"dst_creds\":\"$dst_creds\"}" > /tmp/params
+              curl -k -v -H "Content-Type: application/json" -X POST -d@/tmp/params "$url"
+          env:
+            - name: image_stream
+              value: "${IMAGE_STREAM}"
+            - name: build_number
+              value: "${BUILD_NUMBER}"
+          envFrom:
+            - configMapRef:
+                name: promote-${ENVIRONMENT}-config
+        restartPolicy: OnFailure
+
+##### Parameters #####
+
+parameters:
+- description: The git branch
+  displayName: Git branch
+  name: GIT_BRANCH
+  required: true
+- description: Imagestream
+  displayName: Imagestream
+  name: IMAGE_STREAM
+  required: true
+- description: Build Number
+  displayName: BuildNumber
+  name: BUILD_NUMBER
+  required: true
+- description: Environment
+  displayName: Environment
+  name: ENVIRONMENT
+  required: true

@@ -1,0 +1,100 @@
+############################################################
+# Mandatory configurations
+############################################################
+
+# API informations
+API_NAME = 'vga-api'
+API_VERSION = '1.0'
+API_DESCRIPTION = "ADEO vga-api REST API"
+
+# API URI informations
+PREFIX_URL = '/vga-api/v1'
+
+
+
+############################################################
+# Optional configurations
+# (written value is default value)
+############################################################
+
+# API URI informations
+#BASE_PATH = "https://{{FQDN}}:{{HTTPSRV_PORT}}"
+#BASE_URL = "{{PREFIX_URL}}"
+#SPEC_URL"{{PREFIX_URL}}/spec"
+
+# API URI informations (builtin http server)
+#TEST_BASE_PATH = "http://{{FQDN}}:{{TEST_HTTPSRV_PORT}}"
+#TEST_BASE_URL = "{{PREFIX_URL}}"
+#TEST_SPEC_URL = "{{PREFIX_URL}}/spec"
+
+# configuration directory storing ACL rules files
+#AUTHORIZATION_CONFIG_DIR="./conf/auth.d"
+
+# configuration directory storing users configuration files
+#AUTHENTICATION_CONFIG_DIR="./conf/users.d"
+
+# configuration directory storing dynrules configuration files
+#DYNRULES_CONFIG_DIR="./conf/dynrules.d"
+
+# Default log level for main log file
+# available log levels : CRITICAL, ERROR, WARNING, INFO, DEBUG, DEBUG2
+# (this parameter can be change without restarting server)
+#LOG_LEVEL="INFO"
+
+# default authentication rule for API if not explicitly set (True = authentication required)
+#DEFAULT_AUTHENTICATION = True
+
+# Curl sample for SwaggerUI
+#CURL_SAMPLE = "curl -kv {{BASE_PATH}}{{BASE_URL}}"
+#TEST_CURL_SAMPLE = "curl -kv {{TEST_BASE_PATH}}{{TEST_BASE_URL}}"
+
+# Log files
+#PREFIX_LOG_DIR = "/home3/{{API_NAME}}"
+#TEST_PREFIX_LOG_DIR = "."
+#MAIN_LOG_FILE="{{PREFIX_LOG_DIR}}/log/api.log"
+#AUDIT_LOG_FILE="{{PREFIX_LOG_DIR}}/log/audit.log"
+#AUDIT_LOG_DIR="{{PREFIX_LOG_DIR}}/log/audit"
+#ERROR_LOG_FILE="{{PREFIX_LOG_DIR}}/log/error.log"
+#STATS_LOG_FILE="{{PREFIX_LOG_DIR}}/log/stats.log"
+
+# Directory to store generated documentation (debug mode)
+#GENERATED_DOC_DIR="./doc"
+
+# Debug mode (0 or 1)
+# (can be activated per request if header 'X-Debug' or 'debug' in query string)
+# (this parameter can be change without restarting server)
+#DEBUG=0
+
+# Application exposed port (used in production)
+#HTTPSRV_PORT = 8443
+
+# Python builtin http server parameters (used during dev)
+#TEST_HTTPSRV_HOST = "0.0.0.0"
+#TEST_HTTPSRV_PORT = 5000
+
+# Number of log/stats/audit files to keep in daily logrotate strategy (0 to disable delete)
+#LOGROTATE_NB_KEEP=7
+
+# Caching configuration
+#CACHE_TYPE = 'filesystem'
+#CACHE_RESET = False
+#CACHE_DIR = "{{PREFIX_LOG_DIR}}/flaskcache"
+# no expiration by default
+#CACHE_DEFAULT_TIMEOUT=922337203685477580
+#CACHE_THRESHOLD=922337203685477580
+
+# Default object cache timeout (in seconds)
+#CACHE_TIMEOUT_API_FUNCTION = 30
+#CACHE_TIMEOUT_DB_AUTHORIZATION = 60
+#CACHE_TIMEOUT_DB_AUTHENTICATION = 60
+#CACHE_TIMEOUT_DB_DYNRULES = 20
+#CACHE_TIMEOUT_CONFIG_API = 60
+#CACHE_TIMEOUT_CONFIG_GENERAL = 60
+
+# CORS policy (control origin for API usage from browsers)
+#CORS_ALLOW_ORIGIN  = "*"
+#CORS_ALLOW_METHODS = "GET, POST, PUT, DELETE"
+#CORS_ALLOW_HEADERS = "Authorization, Content-Type, X-AuthToken"
+
+#STATSD_HOST = "localhost"
+#STATSD_PORT = 8135

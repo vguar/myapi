@@ -1,0 +1,66 @@
+apiVersion: v1
+kind: Template
+labels:
+  app: api
+  template: api
+objects:
+- kind: BuildConfig
+  apiVersion: v1
+  metadata:
+    name: "promote-${ENVIRONMENT}"
+    labels:
+      name: "promote-${ENVIRONMENT}"
+  spec:
+    source:
+      git:
+        uri: "${GIT_URL}"
+        ref: "${GIT_BRANCH}"
+      sourceSecret:
+        name: "target-git"
+    strategy:
+      type: JenkinsPipeline
+      jenkinsPipelineStrategy:
+        jenkinsfilePath: "./install/jenkinsfiles/promote.groovy"
+        env:
+          - name: GIT_BRANCH
+            value: "${GIT_BRANCH}"
+          - name: GIT_URL
+            value: "${GIT_URL}"
+          - name: SRC_PROJECT
+            value: "${SRC_PROJECT}"
+          - name: DST_PROJECT
+            value: "${DST_PROJECT}"
+          - name: DST_CLUSTER_URL
+            value: "${DST_CLUSTER_URL}"
+          - name: ENVIRONMENT
+            value: "${ENVIRONMENT}"
+parameters:
+- description: The git branch
+  displayName: git branch
+  name: GIT_BRANCH
+  required: true
+- description: The git url
+  displayName: git url
+  name: GIT_URL
+  required: true
+- description: Source project
+  displayName: Source project
+  name: SRC_PROJECT
+  required: true
+- description: Target project
+  displayName: Target project
+  name: DST_PROJECT
+  required: true
+- description: Target cluster URL
+  displayName: Target cluster URL
+  name: DST_CLUSTER_URL
+  required: true
+- description: Target environment (recette, preprod, prod...)
+  displayName: Target environment
+  name: ENVIRONMENT
+  required: true
+- description: Production environment name (prod, production,...)
+  displayName: Production environment name
+  name: PRODUCTION_ENVIRONMENT_NAME
+  default: "production"
+  required: false

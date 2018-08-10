@@ -1,0 +1,33 @@
+{
+  "name": "AmazingresourcesStatus",
+  "enabled": true,
+  "description": "Get amazingresources status",
+  "swagger": true,
+  "authentication": true,
+  "authorization": true,
+  "authentClass": "flaskit.authentication_lib.token_based@TokenAuthent",
+  "audit": 3,
+  "stats": true,
+  "statsd": false,
+  "dryrun": false,
+  "cache": 0,
+  "loglevel": "DEBUG",
+  "logbody": 1,
+  "logrequest": 3,
+  "args": {
+    "id": {
+      "description": "amazingresources to query",
+      "dataType": "string",
+      "regexp":   "^[a-zA-Z0-9-_.]+$",
+      "location": "uri",
+      "required": true
+    }
+  },
+  "swaggerResponseClass": "AmazingresourcesStatusResponseFields",
+  "swaggerResponseMessages": [
+    {
+      "code": 200,
+      "message": "Successful operation",
+    }
+  ]
+}

@@ -1,0 +1,6 @@
+#!/bin/bash
+
+SOURCE_FOLDER="/tmp/src"
+pip install "$SOURCE_FOLDER/install/Flask-Cache-0.13.adeo.1.tar.gz"
+pip install "$SOURCE_FOLDER/install/FlaskIT-2.4.0.tar.gz"
+fix-permissions /opt/app-root

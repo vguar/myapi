@@ -1,0 +1,108 @@
+apiVersion: v1
+kind: Template
+objects:
+
+##### ImageStreams #####
+
+- apiVersion: "v1"
+  kind: "ImageStream"
+  metadata:
+    name: "consumer-${CONSUMER_NAME}-${GIT_BRANCH}"
+    labels:
+      app: "${GIT_BRANCH}"
+      component: "consumer"
+      branch: "${GIT_BRANCH}"
+      promotion-group: "api"
+
+##### BuildConfigs #####
+
+- apiVersion: "v1"
+  kind: "BuildConfig"
+  metadata:
+    name: "consumer-${CONSUMER_NAME}-${GIT_BRANCH}"
+    labels:
+      app: "${GIT_BRANCH}"
+      component: "consumer"
+      branch: "${GIT_BRANCH}"
+  spec:
+    source:
+      git:
+        uri: "${GIT_URL}"
+        ref: "${GIT_BRANCH}"
+      sourceSecret:
+        name: "target-git"
+    runPolicy: SerialLatestOnly
+    strategy:
+      dockerStrategy:
+        dockerfilePath: "install/Dockerfile-worker-${CONSUMER_NAME}"
+        forcePull: true
+        env:
+          - name: LOG_CONFIG_FILE
+            value: /opt/app-root/src/logging.ini
+    output:
+      to:
+        kind: "ImageStreamTag"
+        name: "consumer-${CONSUMER_NAME}-${GIT_BRANCH}:latest"
+    postCommit:
+      script: "pip install -r test-requirements.txt && cd consumer/tests/ && pytest -m unit"
+
+##### DeploymentConfigs #####
+
+- apiVersion: "v1"
+  kind: "DeploymentConfig"
+  metadata:
+    name: "consumer-${CONSUMER_NAME}-${GIT_BRANCH}"
+    labels:
+      app: "${GIT_BRANCH}"
+      component: "consumer"
+      branch: "${GIT_BRANCH}"
+      promotion-group: "api"
+  spec:
+    strategy:
+      type: Rolling
+    template:
+      metadata:
+        labels:
+          app: "${GIT_BRANCH}"
+          component: "consumer"
+          branch: "${GIT_BRANCH}"
+      spec:
+        containers:
+          - name: "consumer-${CONSUMER_NAME}-${GIT_BRANCH}"
+            env:
+              - name: "REDIS_HOST"
+                value: "redis-server-${GIT_BRANCH}"
+              - name: "REDIS_PORT"
+                value: "6379"
+              - name: "REDIS_DB"
+                value: "1"
+              - name: LOG_CONFIG_FILE
+                value: /opt/app-root/src/logging.ini
+            command: ["/bin/bash", "-c", "celery -A consumer worker --loglevel=info --concurrency=2"]
+    replicas: 2
+    triggers:
+      - type: ConfigChange
+      - type: ImageChange
+        imageChangeParams:
+          automatic: true
+          containerNames:
+          - "consumer-${CONSUMER_NAME}-${GIT_BRANCH}"
+          from:
+            kind: ImageStreamTag
+            name: "consumer-${CONSUMER_NAME}-${GIT_BRANCH}:latest"
+
+##### Parameters #####
+
+parameters:
+- description: Consumer resource name
+  displayName: Consumer name
+  name: CONSUMER_NAME
+  required: true
+- description: The git url
+  displayName: Git url
+  name: GIT_URL
+  required: true
+- description: The git branch
+  displayName: Git branch
+  name: GIT_BRANCH
+  required: true

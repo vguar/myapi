@@ -1,0 +1,6 @@
+<auths enabled="1">
+  <auth token="69f2688e-4893-4b7c-a180-e7bfae6be183" name="health" family="default" enabled="1" expire="" options="">
+    <api name="HealthGet"  enabled="1" options="default=allow"/>
+  </auth>
+</auths>
+

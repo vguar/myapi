@@ -1,0 +1,28 @@
+FROM centos/python-27-centos7
+
+USER 0
+
+RUN yum update -y && \
+    yum install gcc python-devel -y
+COPY ./.s2i/bin/assemble /usr/local/bin/assemble
+RUN chmod +x /usr/local/bin/assemble
+COPY . /tmp/src/
+RUN cp -R /tmp/src/{conf,def,env,resources,app.py} /opt/app-root/src/ &&\
+    chown -R 1001:1001 /opt/app-root/* &&\
+    echo "#!/bin/bash" > /usr/local/bin/start.sh && \
+    echo "source /opt/app-root/etc/generate_container_user" >> /usr/local/bin/start.sh && \
+    echo "exec \"\$@\"" >> /usr/local/bin/start.sh && \
+    chmod +x /usr/local/bin/start.sh
+
+USER 1001
+
+RUN /usr/local/bin/assemble
+WORKDIR /opt/app-root/src
+
+USER 0
+RUN yum remove kernel-headers yum-utils -y && \
+    rpm -e --nodeps yum-plugin-fastestmirror yum-plugin-ovl
+USER 1001
+
+ENTRYPOINT ["/usr/local/bin/start.sh"]
+CMD ["/opt/app-root/src/app.py"]

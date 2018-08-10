@@ -1,0 +1,21 @@
+FROM centos/python-27-centos7
+
+USER 0
+
+RUN yum update -y && \
+    yum install gcc python-devel -y
+COPY ./consumer-amazingresources/.s2i/bin/assemble /usr/local/bin/assemble
+RUN chmod +x /usr/local/bin/assemble
+COPY ./consumer-amazingresources/ /opt/app-root/src/
+RUN chown -R 1001:1001 /opt/app-root/*
+
+USER 1001
+
+RUN /usr/local/bin/assemble
+
+USER 0
+RUN yum remove kernel-headers yum-utils -y && \
+    rpm -e --nodeps yum-plugin-fastestmirror yum-plugin-ovl
+USER 1001
+
+CMD ["celery", "-A", "consumer", "worker", "--loglevel=info"]

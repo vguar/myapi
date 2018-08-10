@@ -1,0 +1,44 @@
+types:
+  - build
+  
+buildrpm:
+  type: build
+  script:
+  # update git tags
+  - git fetch --tags --prune
+  - git describe HEAD --tags --match "v*.*"
+
+  - echo $CI_BUILD_ID
+  - env
+  - pwd
+  - ls
+  - mkdir SOURCES
+  - zip -q -r SOURCES/app.zip *
+  - ls -l SOURCES
+
+  # build packages
+  - rpmbuild -bb install/*.spec
+  - ls -lR RPMS
+  - echo "RPMs availables on the following urls :"
+  - find RPMS -type f -printf "%f\n" | awk '{print "http://rintegr.corp.leroymerlin.com/tmp/"$0}'
+
+  - echo "default :"
+  - find RPMS -type f -printf "%f\n" | grep -E -e ADEO_vga-api-[[:digit:]] -e ADEO_vga-api-conf-default- | awk 'BEGIN{str = ""}{str = str"http://rintegr.corp.leroymerlin.com/tmp/"$0" "}END{print "yum update "str}'
+#  - echo "Recette :"
+#  - find RPMS -type f -printf "%f\n" | grep -E -e ADEO_vga-api-[[:digit:]] -e ADEO_vga-api-conf-recette- | awk 'BEGIN{str = ""}{str = str"http://rintegr.corp.leroymerlin.com/tmp/"$0" "}END{print "yum update "str}'
+#  - echo "Preprod :"
+#  - find RPMS -type f -printf "%f\n" | grep -E -e ADEO_vga-api-[[:digit:]] -e ADEO_vga-api-conf-preprod- | awk 'BEGIN{str = ""}{str = str"http://rintegr.corp.leroymerlin.com/tmp/"$0" "}END{print "yum update "str}'
+#  - echo "Prod :"
+#  - find RPMS -type f -printf "%f\n" | grep -E -e ADEO_vga-api-[[:digit:]] -e ADEO_vga-api-conf-prod- | awk 'BEGIN{str = ""}{str = str"http://rintegr.corp.leroymerlin.com/tmp/"$0" "}END{print "yum update "str}'
+
+
+  # send to http://rintegr/tmp
+  - mkdir -p /home/build/$CI_PROJECT_ID/$CI_BUILD_ID/
+  - cp -Rp RPMS/* /home/build/$CI_PROJECT_ID/$CI_BUILD_ID/
+  - echo "$CI_PROJECT_ID:$CI_BUILD_ID:send_rpm" > /home/build/state
+
+  tags:
+  - build
+  - rpm
+  - centos7
+  

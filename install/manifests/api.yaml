@@ -1,0 +1,106 @@
+apiVersion: v1
+kind: Template
+objects:
+
+##### ImageStream #####
+
+- apiVersion: "v1"
+  kind: "ImageStream"
+  metadata:
+    name: "api-${GIT_BRANCH}"
+    labels:
+      branch: "${GIT_BRANCH}"
+      promotion-group: "api"
+
+##### BuildConfigs #####
+
+- apiVersion: "v1"
+  kind: "BuildConfig"
+  metadata:
+    name: "api-${GIT_BRANCH}"
+    labels:
+      app: "${GIT_BRANCH}"
+      component: "api"
+      branch: "${GIT_BRANCH}"
+  spec:
+    source:
+      git:
+        uri: "${GIT_URL}"
+        ref: "${GIT_BRANCH}"
+      sourceSecret:
+        name: "target-git"
+    runPolicy: SerialLatestOnly
+    strategy:
+      dockerStrategy:
+        dockerfilePath: "install/Dockerfile-api"
+        forcePull: true
+    output:
+      to:
+        kind: "ImageStreamTag"
+        name: "api-${GIT_BRANCH}:latest"
+    postCommit:
+      script: "echo 'API UNIT TESTS COMMAND'"
+
+##### DeploymentConfig #####
+
+- apiVersion: "v1"
+  kind: "DeploymentConfig"
+  metadata:
+    name: "api-${GIT_BRANCH}"
+    labels:
+      app: "${GIT_BRANCH}"
+      component: "api"
+      branch: "${GIT_BRANCH}"
+      promotion-group: "api"
+  spec:
+    template:
+      metadata:
+        labels:
+          app: "${GIT_BRANCH}"
+          component: "api"
+          branch: "${GIT_BRANCH}"
+      spec:
+        containers:
+          - name: "api"
+            ports:
+              - containerPort: 5000
+                protocol: "TCP"
+                name: http
+            env:
+              - name: "REDIS_HOST"
+                value: "redis-server-${GIT_BRANCH}"
+              - name: "REDIS_PORT"
+                value: "6379"
+              - name: "REDIS_DB"
+                value: "1"
+            volumeMounts:
+              - mountPath: /opt/app-root/src/conf/auth.d
+                name: volume-auth
+        volumes:
+          - configMap:
+              defaultMode: 420
+              name: "config-${GIT_BRANCH}"
+            name: volume-auth
+    replicas: 2
+    triggers:
+      - type: ConfigChange
+      - type: ImageChange
+        imageChangeParams:
+          automatic: true
+          containerNames:
+          - "api"
+          from:
+            kind: ImageStreamTag
+            name: "api-${GIT_BRANCH}:latest"
+
+##### Parameters #####
+
+parameters:
+- description: The git url
+  displayName: Git url
+  name: GIT_URL
+  required: true
+- description: The git branch
+  displayName: Git branch
+  name: GIT_BRANCH
+  required: true
